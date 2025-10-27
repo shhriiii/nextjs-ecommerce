@@ -1,55 +1,39 @@
-// app/products/[slug]/page.js
-
-// ✅ Let Next.js revalidate this page every 60 seconds
+// app/page.js
+export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-// ✅ These two lines ensure no build-time fetch failures
-export const dynamic = "force-dynamic";
-export const dynamicParams = true;
+import Link from "next/link";
 
-import { notFound } from "next/navigation";
-
-async function getProduct(slug) {
-  // Use absolute URL during build to prevent ECONNREFUSED
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
-  const res = await fetch(`${baseUrl}/api/products/${slug}`, {
+async function getProducts() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/products`, {
     next: { revalidate: 60 },
   });
-
-  if (!res.ok) return null;
+  if (!res.ok) return [];
   return res.json();
 }
 
-export default async function ProductDetail({ params }) {
-  const slug = (await params)?.slug;
-
-  const product = await getProduct(slug);
-  if (!product) return notFound();
+export default async function HomePage() {
+  const products = await getProducts();
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 text-gray-800">
-      <div className="max-w-3xl mx-auto py-12 px-4">
-        <div className="bg-white/70 backdrop-blur-md shadow-lg rounded-2xl p-8">
-          <h1 className="text-3xl font-bold text-gray-700 mb-3">
-            {product.name}
-          </h1>
-          <p className="text-gray-500 mb-1">Category: {product.category}</p>
-          <p className="text-blue-500 text-xl font-semibold mb-6">
-            ₹{product.price}
-          </p>
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-8">
+      <h1 className="text-4xl font-bold text-center text-gray-700 mb-8">
+        🛍️ Our Products
+      </h1>
 
-          <p className="text-gray-700 mb-6">{product.description}</p>
-
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4 text-sm text-gray-500">
-            <p>Inventory: {product.inventory}</p>
-            <p>
-              Last updated:{" "}
-              {new Date(product.lastUpdated).toLocaleString("en-IN")}
-            </p>
-          </div>
-        </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+        {products.map((p) => (
+          <Link
+            key={p._id}
+            href={`/products/${p.slug}`}
+            className="bg-white/70 backdrop-blur-md shadow-lg rounded-2xl p-6 hover:scale-105 transition-transform"
+          >
+            <h2 className="text-xl font-semibold text-gray-800">{p.name}</h2>
+            <p className="text-gray-500 mb-2">{p.category}</p>
+            <p className="text-green-600 font-bold text-lg">₹{p.price}</p>
+          </Link>
+        ))}
       </div>
     </main>
   );
