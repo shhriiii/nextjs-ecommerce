@@ -1,21 +1,20 @@
+// app/products/[slug]/page.js
+
+// ✅ Let Next.js revalidate this page every 60 seconds
+export const revalidate = 60;
+
+// ✅ These two lines ensure no build-time fetch failures
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
 
 import { notFound } from "next/navigation";
 
-// Pre-generate all product paths at build time
-export async function generateStaticParams() {
-  const res = await fetch("http://localhost:3000/api/products");
-  const products = await res.json();
-
-  return products.map((p) => ({
-    slug: p.slug,
-  }));
-}
-
-export const revalidate = 60;
-
 async function getProduct(slug) {
-  const res = await fetch(`http://localhost:3000/api/products/${slug}`, {
+  // Use absolute URL during build to prevent ECONNREFUSED
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/api/products/${slug}`, {
     next: { revalidate: 60 },
   });
 
@@ -23,10 +22,8 @@ async function getProduct(slug) {
   return res.json();
 }
 
-// FIX: await params
 export default async function ProductDetail({ params }) {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  const slug = (await params)?.slug;
 
   const product = await getProduct(slug);
   if (!product) return notFound();
@@ -57,4 +54,3 @@ export default async function ProductDetail({ params }) {
     </main>
   );
 }
-
