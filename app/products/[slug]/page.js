@@ -1,30 +1,16 @@
 // app/page.js
-
-// ✅ Force dynamic rendering, no static generation
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
-export const revalidate = 0;
+export const revalidate = 60;
 
 import Link from "next/link";
-
-async function getProducts() {
-  // 🧩 Use base URL environment variable (Render-safe)
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
-  try {
-    const res = await fetch(`${baseUrl}/api/products`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch");
-    return res.json();
-  } catch (err) {
-    console.error("Fetch error:", err);
-    return []; // avoid breaking build
-  }
-}
+import connectDB from "@/lib/mongodb";
+import Product from "@/models/Product";
 
 export default async function HomePage() {
-  const products = await getProducts();
+  // 🧩 Direct DB query instead of fetch() – works during build
+  await connectDB();
+  const products = await Product.find().lean();
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 p-8">
