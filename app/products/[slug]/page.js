@@ -4,7 +4,8 @@ export const dynamicParams = true;
 export const revalidate = 60;
 
 import Link from "next/link";
-import connectDB from "@/lib/mongodb";
+import { connectDB } from "@/lib/mongodb";
+
 import Product from "@/models/Product";
 
 export default async function HomePage() {
