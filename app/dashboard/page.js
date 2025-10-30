@@ -1,17 +1,28 @@
 import { headers } from "next/headers";
 
+
+
 export const dynamic = "force-dynamic";
 
 async function getProducts() {
-  const host = headers().get("host"); // works both locally & on Vercel
-  const protocol = process.env.VERCEL ? "https" : "http";
-  const res = await fetch(`${protocol}://${host}/api/products`, {
+  // Use deployed URL on Vercel, otherwise localhost in dev
+  const baseUrl =
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}` // ✅ works in Vercel
+      : "http://localhost:3000"; // ✅ works locally
+
+  const res = await fetch(`${baseUrl}/api/products`, {
     cache: "no-store",
   });
 
-  if (!res.ok) throw new Error("Failed to fetch products");
+  if (!res.ok) {
+    console.error("❌ Fetch failed:", res.status, res.statusText);
+    throw new Error("Failed to fetch products");
+  }
+
   return res.json();
 }
+
 
 export default async function DashboardPage() {
   const products = await getProducts();
