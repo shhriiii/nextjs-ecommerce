@@ -1,10 +1,10 @@
 import Image from "next/image";
 
-// ✅ Revalidate every 60 seconds
-export const revalidate = 60; // revalidate every 60s
+// ✅ Always fetch dynamically (no build-time pre-render)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getProducts() {
-  // ✅ Automatically use correct base URL in both dev & prod
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
     (process.env.VERCEL_URL
@@ -12,13 +12,12 @@ async function getProducts() {
       : "http://localhost:3000");
 
   const res = await fetch(`${baseUrl}/api/products`, {
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
-
 
 export default async function HomePage() {
   const products = await getProducts();
@@ -30,7 +29,6 @@ export default async function HomePage() {
           🛍️ Calm & Modern Product Catalog
         </h1>
 
-        {/* Search bar */}
         <input
           type="text"
           placeholder="Search products..."
@@ -38,7 +36,6 @@ export default async function HomePage() {
           id="searchBox"
         />
 
-        {/* Product grid */}
         <div
           id="productGrid"
           className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
@@ -59,7 +56,6 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Client-side search filter */}
       <script
         dangerouslySetInnerHTML={{
           __html: `
