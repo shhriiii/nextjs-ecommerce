@@ -1,9 +1,8 @@
-import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Product from "./models/Product.js";
-import connectDB from "./lib/mongodb.js";
+dotenv.config({ path: "./.env.local" }); // ✅ explicitly load your .env.local
 
-dotenv.config();
+import { connectDB } from "./lib/mongodb.js";
+import Product from "./models/Product.js";
 
 const seedProducts = [
   {
@@ -46,3 +45,6 @@ async function seedDB() {
 }
 
 seedDB();
+
+
+
