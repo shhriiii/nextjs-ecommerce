@@ -1,12 +1,22 @@
 import Image from "next/image";
 
-export const revalidate = 60; // (optional) revalidate every 60s for freshness
+// ✅ Revalidate every 60 seconds
+export const revalidate = 60;
 
+// ✅ Fetch products dynamically based on environment
 async function getProducts() {
-  const res = await fetch("http://localhost:3000/api/products", {
-    next: { revalidate: 60 }, // SSG with incremental revalidation
+  // Use base URL dynamically
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/api/products`, {
+    next: { revalidate: 60 }, // ISR with 60s revalidation
   });
-  if (!res.ok) throw new Error("Failed to fetch products");
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch products: ${res.statusText}`);
+  }
+
   return res.json();
 }
 
@@ -20,7 +30,7 @@ export default async function HomePage() {
           🛍️ Calm & Modern Product Catalog
         </h1>
 
-        {/* Search bar (client-side filter) */}
+        {/* Search bar */}
         <input
           type="text"
           placeholder="Search products..."
@@ -50,21 +60,23 @@ export default async function HomePage() {
       </div>
 
       {/* Client-side search filter */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          const input = document.getElementById('searchBox');
-          const grid = document.getElementById('productGrid');
-          const allCards = Array.from(grid.children);
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            const input = document.getElementById('searchBox');
+            const grid = document.getElementById('productGrid');
+            const allCards = Array.from(grid.children);
 
-          input.addEventListener('input', e => {
-            const term = e.target.value.toLowerCase();
-            allCards.forEach(card => {
-              const title = card.querySelector('h2').textContent.toLowerCase();
-              card.style.display = title.includes(term) ? '' : 'none';
+            input.addEventListener('input', e => {
+              const term = e.target.value.toLowerCase();
+              allCards.forEach(card => {
+                const title = card.querySelector('h2').textContent.toLowerCase();
+                card.style.display = title.includes(term) ? '' : 'none';
+              });
             });
-          });
-        `
-      }} />
+          `,
+        }}
+      />
     </main>
   );
 }
