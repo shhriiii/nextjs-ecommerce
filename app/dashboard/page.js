@@ -1,26 +1,22 @@
 import { headers } from "next/headers";
 
-export const dynamic = "force-dynamic";
+
+export const dynamic = "force-dynamic"; // ensures SSR (no caching)
 
 async function getProducts() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
-
-  const res = await fetch(`${baseUrl}/api/products`, {
+  // ✅ Relative path works both locally and on Vercel
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : ""}/api/products`, {
     cache: "no-store",
-    next: { revalidate: 0 },
   });
 
   if (!res.ok) {
-    console.error("❌ Fetch failed:", res.status, res.statusText, baseUrl);
+    console.error("❌ Failed to fetch products:", res.status, res.statusText);
     throw new Error("Failed to fetch products");
   }
 
   return res.json();
 }
+
 
 
 
