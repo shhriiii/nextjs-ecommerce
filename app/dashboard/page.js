@@ -1,13 +1,11 @@
-export const dynamic = "force-dynamic"; // ensures SSR (no caching)
+import { headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
 
 async function getProducts() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://nextjs-ecommerce-iota-pearl.vercel.app"; // fallback
-
-  const res = await fetch(`${baseUrl}/api/products`, {
+  const host = headers().get("host"); // works both locally & on Vercel
+  const protocol = process.env.VERCEL ? "https" : "http";
+  const res = await fetch(`${protocol}://${host}/api/products`, {
     cache: "no-store",
   });
 
@@ -15,11 +13,9 @@ async function getProducts() {
   return res.json();
 }
 
-
 export default async function DashboardPage() {
   const products = await getProducts();
 
-  // Stats
   const totalProducts = products.length;
   const lowStock = products.filter((p) => p.inventory < 10).length;
   const avgPrice =
@@ -36,7 +32,6 @@ export default async function DashboardPage() {
           📊 Inventory Dashboard
         </h1>
 
-        {/* Stats Section */}
         <div className="grid sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-white/70 backdrop-blur-lg p-6 rounded-2xl shadow text-center">
             <h2 className="text-2xl font-bold text-blue-500">{totalProducts}</h2>
@@ -52,7 +47,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Products Table */}
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden">
           <table className="w-full border-collapse">
             <thead className="bg-blue-100">
