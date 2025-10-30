@@ -1,8 +1,9 @@
 import Image from "next/image";
 
-// ✅ Always fetch dynamically (no build-time pre-render)
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// // ✅ Always fetch dynamically (no build-time pre-render)
+// export const dynamic = "force-dynamic";
+// export const revalidate = 0;
+export const revalidate = 60;
 
 async function getProducts() {
   const baseUrl =
