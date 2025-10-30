@@ -1,27 +1,27 @@
 import { headers } from "next/headers";
 
-
-
 export const dynamic = "force-dynamic";
 
 async function getProducts() {
-  // Use deployed URL on Vercel, otherwise localhost in dev
   const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}` // ✅ works in Vercel
-      : "http://localhost:3000"; // ✅ works locally
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
 
   const res = await fetch(`${baseUrl}/api/products`, {
     cache: "no-store",
+    next: { revalidate: 0 },
   });
 
   if (!res.ok) {
-    console.error("❌ Fetch failed:", res.status, res.statusText);
+    console.error("❌ Fetch failed:", res.status, res.statusText, baseUrl);
     throw new Error("Failed to fetch products");
   }
 
   return res.json();
 }
+
 
 
 export default async function DashboardPage() {
