@@ -1,24 +1,24 @@
 import Image from "next/image";
 
 // ✅ Revalidate every 60 seconds
-export const revalidate = 60;
+export const revalidate = 60; // revalidate every 60s
 
-// ✅ Fetch products dynamically based on environment
 async function getProducts() {
-  // Use base URL dynamically
+  // ✅ Automatically use correct base URL in both dev & prod
   const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
 
   const res = await fetch(`${baseUrl}/api/products`, {
-    next: { revalidate: 60 }, // ISR with 60s revalidation
+    next: { revalidate: 60 },
   });
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch products: ${res.statusText}`);
-  }
-
+  if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
+
 
 export default async function HomePage() {
   const products = await getProducts();
