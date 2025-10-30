@@ -11,13 +11,19 @@ async function getProducts() {
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
 
-  const res = await fetch(`${baseUrl}/api/products`, {
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`${baseUrl}/api/products`, {
+      next: { revalidate: 60 },
+    });
 
-  if (!res.ok) throw new Error("Failed to fetch products");
-  return res.json();
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    return res.json();
+  } catch (err) {
+    console.error("❌ Product fetch error:", err.message);
+    return []; // prevents the SSR crash
+  }
 }
+
 
 export default async function HomePage() {
   const products = await getProducts();

@@ -1,9 +1,17 @@
 export const dynamic = "force-dynamic"; // ensures SSR (no caching)
 
 async function getProducts() {
-  const res = await fetch("http://localhost:3000/api/products", {
+  // 🧩 Use dynamic base URL depending on environment
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
+
+  const res = await fetch(`${baseUrl}/api/products`, {
     cache: "no-store", // no caching at all
   });
+
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
