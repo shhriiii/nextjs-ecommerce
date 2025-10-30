@@ -1,20 +1,20 @@
 export const dynamic = "force-dynamic"; // ensures SSR (no caching)
 
 async function getProducts() {
-  // 🧩 Use dynamic base URL depending on environment
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL
+    process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
+      : "https://nextjs-ecommerce-iota-pearl.vercel.app"; // fallback
 
   const res = await fetch(`${baseUrl}/api/products`, {
-    cache: "no-store", // no caching at all
+    cache: "no-store",
   });
 
   if (!res.ok) throw new Error("Failed to fetch products");
   return res.json();
 }
+
 
 export default async function DashboardPage() {
   const products = await getProducts();
